@@ -1,0 +1,42 @@
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: allowed
+  namespace: security
+  annotations:
+    apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default,localhost/restrict-apparmor'
+    apparmor.security.beta.kubernetes.io/defaultProfileName:  'localhost/restrict-apparmor'
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+    - 'hostPath'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    rule: 'RunAsAny'
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  hostPorts:
+    - min: 32500
+    - max: 32500
+  readOnlyRootFilesystem: false

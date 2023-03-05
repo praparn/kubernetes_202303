@@ -1,0 +1,67 @@
+====================================================
+Part0: Install Helm & Tiller
+====================================================
+### Run on Master Node ###
+1. Install helm client on master node by command:
+	curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+   chmod 700 get_helm.sh
+   ./get_helm.sh
+
+2. Check helm readiness and update by command:
+	 helm list			==> Expect blank
+    (Remark: Case to rollback and reinitial helm: helm reset --force)
+
+====================================================
+Part 1: Deploy grafana via helm:
+====================================================
+1. Add stable repositories from kubernetes-charts:
+	helm repo add grafana https://grafana.github.io/helm-charts
+   helm repo update
+   helm search repo grafana
+
+2. Install grafana helm by command
+   helm install loki-grafana grafana/grafana --set "service.type=NodePort"
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Example Output:
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NAME: loki-grafana
+LAST DEPLOYED: Sat Mar 27 13:46:18 2021
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get your 'admin' user password by running:
+
+   kubectl get secret --namespace default loki-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+2. The Grafana server can be accessed via port 80 on the following DNS name from within your cluster:
+
+   loki-grafana.default.svc.cluster.local
+
+   Get the Grafana URL to visit by running these commands in the same shell:
+export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services loki-grafana)
+     export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+     echo http://$NODE_IP:$NODE_PORT
+
+
+3. Login with the password from step 1 and the username: admin
+#################################################################################
+######   WARNING: Persistence is disabled!!! You will lose your data when   #####
+######            the Grafana pod is terminated.                            #####
+#################################################################################
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3. Check password of admin grafana by command:
+kubectl get secret --namespace default loki-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+
+4. Check release for helm by command:
+   helm ls --all
+   watch kubectl get pods
+
+5. Check port to access by command:
+  kubectl get svc/loki-grafana
+
+6. Test access to grafana by url http://<any public ip address of node>:<port of service from No.5>
+
+7. Cleanup lab by command:
+	helm uninstall loki-grafana

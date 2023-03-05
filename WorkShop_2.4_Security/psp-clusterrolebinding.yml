@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: clusterbinding-psp
+  namespace: namespace-psp
+roleRef:
+  kind: ClusterRole
+  name: role-psp
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: serviceaccount-psp
+  namespace: namespace-psp

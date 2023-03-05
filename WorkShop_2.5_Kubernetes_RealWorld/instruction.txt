@@ -1,0 +1,363 @@
+Instruction for Workshop 2.5 Kubernetes in RealWorld:
+Note: This instruction will start lab for kubernetes's cluster for real workshop:
+
+0. Reinitial your machine before grouping with your friend by command:
+	cilium hubble disable
+    cilium uninstall --wait
+	sudo su -
+    kubeadm reset					==> answer: y
+	rm -rf /var/lib/etcd
+	rm -rf /home/ubuntu/.kube
+	ctr -n k8s.io i rm $(ctr -n k8s.io i ls -q)
+	reboot
+
+	*Optional1: For clean workshop and initial lab*
+	------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	cd ~
+	rm -rf kubernetes_202205/
+	git clone https://github.com/praparn/kubernetes_202205.git
+	------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	*Optional2: Check for module enable (IF not run script below for enable)
+	------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    sudo lsmod | grep -e ip_vs -e nf_conntrack_ipv4
+	------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    *Optional3: Check and reinstall cilium binary
+	------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    #Cilium Cli
+    curl -L --remote-name-all https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz{,.sha256sum}
+    sha256sum --check cilium-linux-amd64.tar.gz.sha256sum
+    sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
+    rm cilium-linux-amd64.tar.gz{,.sha256sum}
+
+    #Hubble Cli
+    export HUBBLE_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt)
+    curl -L --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-amd64.tar.gz{,.sha256sum}
+    sha256sum --check hubble-linux-amd64.tar.gz.sha256sum
+    sudo tar xzvfC hubble-linux-amd64.tar.gz /usr/local/bin
+    rm hubble-linux-amd64.tar.gz{,.sha256sum}
+	------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1. Check "LAB" sheet for your group and inform your team for all node information like below:
+====================================================
+Lab Description: (Check you excel sheet)
+ClusterName: XXXXX
+CA-Cert-Hash: XXXXX
+Token: XXXXX
+Ingress CNAME: XXXXX
+
+Machine name		            			Roles:			IP Address: (Private)		IP Address: (Public)			Hostname
+Training_DockerZerotoHero_StudentGX_1	   	Master			10.200.X.X					X.X.X.X							ip-10-200-X-X.ap-southeast-1.compute.internal
+Training_DockerZerotoHero_StudentGX_2       NodePort		10.200.X.X					X.X.X.X							ip-10-200-X-X.ap-southeast-1.compute.internal
+Training_DockerZerotoHero_StudentGX_3   	NodePort		10.200.X.X					X.X.X.X							ip-10-200-X-X.ap-southeast-1.compute.internal
+===================================================
+(export environment)
+  export ClusterName=<clustername>
+  export HostnameMaster1=<hostname master1>
+  export HostnameWorker1=<hostname worker1>
+  export HostnameWorker2=<hostname worker2>
+
+
+  export tokenid=<tokenid>   #export this after master node had been initial
+  export cacerhash=<CA-Cert-Hash>   #export this after master node had been initial
+===================================================
+0. Follow document pdf for access ssh (Windows/MACOS)
+
+1. (all node) SSH/Putty to target machine with command below:
+ssh -i docker_lab ubuntu@<Public IP Address of Master>
+ssh -i docker_lab ubuntu@<Public IP Address of NodePort1>
+ssh -i docker_lab ubuntu@<Public IP Address of NodePort2>
+
+2. *Optional* (all node) Setup TMUX script and SSH for Share Session:
+sudo apt-get update && sudo apt-get install -y tmux
+tmux new -s Lab
+
+	# Remark: For your co-worker please kindly ssh to target node and join session with command #
+		tmux attach-session -t Lab
+
+3. *Optional* (all node) Check hostname for each node and record by command:
+	curl http://169.254.169.254/latest/meta-data/local-hostname
+
+4. (Master) Prepare configuration for initial kubernetes master
+    (run export environment)
+	cd ~
+	curl https://raw.githubusercontent.com/praparn/sourcesetup/master/kubernetes_initial/version124/kubeadm-init.yaml > ~/kubeadm-init.yaml
+  	sed -i -e "s/2.2.2.2/$HostnameMaster1/g" ~/kubeadm-init.yaml
+  	sed -i -e "s/hostnamemaster/$HostnameMaster1/g" ~/kubeadm-init.yaml
+  	sed -i -e "s/KubernetesClusterName/$ClusterName/g" ~/kubeadm-init.yaml
+  	more ~/kubeadm-init.yaml
+
+5. (Master) initial cluster by command:
+	sudo su -
+	kubeadm init --config /home/ubuntu/kubeadm-init.yaml
+	exit
+
+	*Remark: Need to record token Output
+    -------------------------------------------------
+    Token output:
+    -------------------------------------------------
+
+You can now join any number of control-plane nodes by copying certificate authorities
+and service account keys on each node and then running the following as root:
+
+  kubeadm join 10.0.1.67:6443 --token 1ogaw7.1dx1qg34qzi6ha5t \
+	--discovery-token-ca-cert-hash sha256:931d6c0f44e2c2558591845ffd95c7fb6ab47e687b83015c2a5b9b229940d786 \
+	--control-plane 
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 10.0.1.67:6443 --token 1ogaw7.1dx1qg34qzi6ha5t \
+	--discovery-token-ca-cert-hash sha256:931d6c0f44e2c2558591845ffd95c7fb6ab47e687b83015c2a5b9b229940d786 
+	-------------------------------------------------
+
+6. (Master) Setup run cluster system by command (Regular User):
+	mkdir -p $HOME/.kube
+  	sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+	sudo chown $(id -u):$(id -g) $HOME/.kube/config
+	kubectl taint nodes --all node-role.kubernetes.io/master-
+
+7. (Master) Check IPVS mode on kube-proxy by command:
+    kubectl get pods -n kube-system
+    kubectl logs kube-proxy-<XXXX> -n kube-system
+
+8 (Master) Check IPVS policy by ipvsadm
+	sudo ipvsadm
+	-------------------------------------------------
+	Example Result:
+	-------------------------------------------------
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+TCP  ip-10-96-0-1.ap-southeast-1. rr
+  -> ip-10-0-1-191.ap-southeast-1 Masq    1      0          6         
+TCP  ip-10-96-0-10.ap-southeast-1 rr
+TCP  ip-10-96-0-10.ap-southeast-1 rr
+UDP  ip-10-96-0-10.ap-southeast-1 rr
+	-------------------------------------------------
+
+9. (Master) Create cilium network component by command:
+    cilium install
+	cilium status
+	-----------------------------------------------
+    Optional: Case we need to install via calico
+    kubectl apply -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.5_Kubernetes_RealWorld/calico_tuning.yaml
+    -----------------------------------------------
+
+10. (Master) Check master readiness and dns by command and enable hubble ui (Take 5 - 10 min):
+	watch kubectl get pods --all-namespaces
+	cilium hubble enable --ui 
+
+========================================  Create Dashboard =====================================================================
+11. (Master) Create Dashboard by command:
+	kubectl create namespace kubernetes-dashboard
+	kubectl create secret generic kubernetes-dashboard-certs --from-file=$HOME/kubernetes_202205/WorkShop_1.7_Resource_Management/cert -n kubernetes-dashboard
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/dashboard-restrict.yml
+	watch kubectl get all -n=kubernetes-dashboard
+
+12. (Master) Check Bearer Token for access by command:
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/user-restrict.yml
+	kubectl get secret -n kubernetes-dashboard
+	kubectl describe secret <admin-user-token-xxx> -n kubernetes-dashboard
+	*Remark: Record Token:
+	Ex:
+	------------------------------------------------------------------------------------
+ eyJhbGciOiJSUzI1NiIsImtpZCI6ImZ6RnRXNmI3STdLR3VRS2lLSjU0LV9wU2hySzVKS1JDdXczQ2NkTmU4eVkifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLTQ0Zm1nIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI3NmNjNWRiMC0yMWRlLTQyZTItOWMxNi1lYjExZDhkMTAyNmMiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZXJuZXRlcy1kYXNoYm9hcmQ6YWRtaW4tdXNlciJ9.Eoj6wFbMpeBbBYmnWx9IbeuHHDswsboWmtsmymFmRhAy0a8ivYs-yFYpOo1rIHte4EuKwGllIHbOIdyosWnpPXF_7q_yxhjTk1tfOPAzbyIFIzggasXJwIpTQReH7pu7cHE6dd4olJYtiklfI_UotM4VvvAGpL8xaWPRx8Am9laL11LJFccmiWaw9YjQlU1-1iMzSwVKWHkX990MGGNNr0hXSQSYPHYyjaiyU1RoSRjJyhwxXhV-nneB3qDqUjJiIVEtoAoIR0taQdrXYqxLiwdZGyfhsFJWNxlYhMGcLiLE-IH8TA_7kvTQg7pqJtkcfRiLUxmAajlrHNaiCEtPFQ
+ 	------------------------------------------------------------------------------------
+
+13. (Master) Open Kubernetes's forward for operate:
+	kubectl get pods -n=kubernetes-dashboard
+	kubectl port-forward --address 0.0.0.0 pods/<kubernetes-dashboard-xxx> 8443:8443 -n=kubernetes-dashboard
+	(Ex: kubectl port-forward --address 0.0.0.0 pods/kubernetes-dashboard-7b5bf5d559-stwjc 8443:8443 -n=kubernetes-dashboard)
+
+	*Test by open browser: 
+	https://<Public IP>:8443
+========================================  Create Dashboard =====================================================================
+
+14. (Worker1) Prepare configuration for initial kubernetes worker:
+(run export environment)
+cd ~
+curl https://raw.githubusercontent.com/praparn/sourcesetup/master/kubernetes_initial/version124/kubeadm-join-worker.yaml > ~/kubeadm-join-worker.yaml
+sed -i -e "s/hostnamelb/$HostnameMaster1/g" ~/kubeadm-join-worker.yaml
+sed -i -e "s/token: tokenid/token: $tokenid/g" ~/kubeadm-join-worker.yaml
+sed -i -e "s/sha256:cahash/$cacerhash/g" ~/kubeadm-join-worker.yaml
+sed -i -e "s/name: hostname/name: $HostnameWorker1/g" ~/kubeadm-join-worker.yaml
+more ~/kubeadm-join-worker.yaml
+
+15. (Worker1) join cluster by command:
+sudo su -
+kubeadm join --config /home/ubuntu/kubeadm-join-worker.yaml
+exit
+htop
+
+16. (Worker2) Prepare configuration for initial kubernetes worker:
+(run export environment)
+cd ~
+curl https://raw.githubusercontent.com/praparn/sourcesetup/master/kubernetes_initial/version124/kubeadm-join-worker.yaml > ~/kubeadm-join-worker.yaml
+sed -i -e "s/hostnamelb/$HostnameMaster1/g" ~/kubeadm-join-worker.yaml
+sed -i -e "s/token: tokenid/token: $tokenid/g" ~/kubeadm-join-worker.yaml
+sed -i -e "s/sha256:cahash/$cacerhash/g" ~/kubeadm-join-worker.yaml
+sed -i -e "s/name: hostname/name: $HostnameWorker2/g" ~/kubeadm-join-worker.yaml
+more ~/kubeadm-join-worker.yaml
+
+17. (Worker2) join cluster by command:
+sudo su -
+kubeadm join --config /home/ubuntu/kubeadm-join-worker.yaml
+exit
+htop
+
+18. (Master) Check Node in Cluster by command (This take 5 - 10 min):
+watch kubectl get nodes
+
+19. (Master) Add label for node of worker by command:
+kubectl label nodes $HostnameWorker1 node-role.kubernetes.io/worker=
+kubectl label nodes $HostnameWorker2 node-role.kubernetes.io/worker=
+kubectl get nodes
+
+19. (Master)Check Pods from all cluster system running by command:
+watch kubectl get pods --all-namespaces
+
+20. (Master) Check IPVS mode on every kube-proxy by command:
+    kubectl get pods -n kube-system -o wide ==> Record kube-proxy name
+    kubectl logs kube-proxy-<XXXX> -n kube-system
+
+21 (Worker1) Check IPVS policy by ipvsadm
+	sudo ipvsadm
+	-------------------------------------------------
+	Example Result:
+	-------------------------------------------------
+IP Virtual Server version 1.2.1 (size=4096)
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+TCP  ip-10-96-0-1.ap-southeast-1. rr
+  -> ip-10-0-1-191.ap-southeast-1 Masq    1      3          0         
+TCP  ip-10-96-0-10.ap-southeast-1 rr
+  -> ip-192-168-221-2.ap-southeas Masq    1      0          0         
+  -> ip-192-168-221-3.ap-southeas Masq    1      0          0         
+TCP  ip-10-96-0-10.ap-southeast-1 rr
+  -> ip-192-168-221-2.ap-southeas Masq    1      0          0         
+  -> ip-192-168-221-3.ap-southeas Masq    1      0          0         
+TCP  ip-10-98-203-179.ap-southeas rr
+  -> ip-192-168-221-4.ap-southeas Masq    1      0          0         
+TCP  ip-10-109-146-178.ap-southea rr
+  -> ip-192-168-221-5.ap-southeas Masq    1      0          0         
+UDP  ip-10-96-0-10.ap-southeast-1 rr
+  -> ip-192-168-221-2.ap-southeas Masq    1      0          0         
+  -> ip-192-168-221-3.ap-southeas Masq    1      0          0 
+	-------------------------------------------------
+
+22 (Worker2) Check IPVS policy by ipvsadm
+	sudo ipvsadm
+	-------------------------------------------------
+	Example Result:
+	-------------------------------------------------
+IP Virtual Server version 1.2.1 (size=4096)
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+TCP  ip-10-96-0-1.ap-southeast-1. rr
+  -> ip-10-0-1-191.ap-southeast-1 Masq    1      3          0         
+TCP  ip-10-96-0-10.ap-southeast-1 rr
+  -> ip-192-168-221-2.ap-southeas Masq    1      0          0         
+  -> ip-192-168-221-3.ap-southeas Masq    1      0          0         
+TCP  ip-10-96-0-10.ap-southeast-1 rr
+  -> ip-192-168-221-2.ap-southeas Masq    1      0          0         
+  -> ip-192-168-221-3.ap-southeas Masq    1      0          0         
+TCP  ip-10-98-203-179.ap-southeas rr
+  -> ip-192-168-221-4.ap-southeas Masq    1      0          0         
+TCP  ip-10-109-146-178.ap-southea rr
+  -> ip-192-168-221-5.ap-southeas Masq    1      0          0         
+UDP  ip-10-96-0-10.ap-southeast-1 rr
+  -> ip-192-168-221-2.ap-southeas Masq    1      0          0         
+  -> ip-192-168-221-3.ap-southeas Masq    1      0          0 
+	-------------------------------------------------
+
+23. (Master) Test deployment basic nginx pods by command
+kubectl run webtest --image=labdocker/nginx:http2 --port=443
+kubectl get pods -o wide
+
+24. (Master) Expose web outside:
+kubectl expose pods webtest --target-port=443 --type=NodePort
+kubectl get svc -o wide                                               ==> Record Public Port
+
+25. (Master) Test get web outside:
+curl https://$HostnameMaster1:xxxx -k
+curl https://$HostnameWorker1:xxxx -k
+curl https://$HostnameWorker2:xxxx -k
+
+26. (Master) Cleanup Lab by command:
+kubectl delete pods/webtest
+kubectl delete svc/webtest
+
+====================================== Create Ingress Controller====================================================
+
+27. (Master) Create ingress set:
+	27.1. Create NLB ingress on aws resource by command: 
+	kubectl apply -f ~/kubernetes_202205/WorkShop_2.5_Kubernetes_RealWorld/ingress-nginx/deploy/static/provider/aws/deploy.yaml
+	*Remark: If you need to modified config. Edit this file first
+	more ~/kubernetes_202205/WorkShop_2.5_Kubernetes_RealWorld/ingress-nginx/deploy/static/provider/aws/deploy.yaml
+========================================
+Example:
+[...]
+apiVersion: v1
+data:
+  allow-snippet-annotations: "true"
+  proxy-body-size: 50m
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+    app.kubernetes.io/version: 1.1.1
+    helm.sh/chart: ingress-nginx-4.0.16
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+[...]
+========================================
+
+	27.2 Check by command: 
+	watch kubectl get pods -n=ingress-nginx
+
+	27.3 Collect external cname by command:
+	kubectl get svc -n=ingress-nginx	(This may take several miniute before finished) ==> Record "CNAME of NLB"
+========================================
+Example:
+NAME                                 TYPE           CLUSTER-IP     EXTERNAL-IP                                                                          PORT(S)                      AGE
+ingress-nginx-controller             LoadBalancer   10.108.51.60   ae714106db8af4ce2bb437c23cdc0754-a893eb3274461de9.elb.ap-southeast-1.amazonaws.com   80:31465/TCP,443:30536/TCP   100s
+ingress-nginx-controller-admission   ClusterIP      10.97.28.203   <none>                                                                               443/TCP                      100s
+========================================
+
+    27.4 Wait (5 - 10 min) for NLB operate done and check response by command:
+	curl http://<CNAME of NLB>
+	curl https://<CNAME of NLB> -k
+
+
+28. (Master) Test deploy ingress service
+# Create Service/Pods/Deployment for webtest1 and webtest2 by command:
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/webtest_deploy.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/webtest_deploy2.yml
+
+# View service for connection by command:
+	kubectl get svc -o wide
+
+# Create ingress for access by command:
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/ingress_webtest.yml
+	kubectl get ing -o wide
+	kubectl describe ing/ingresswebtest
+
+29. (Master/Local (MAC)) Test access website by command or browser:
+	curl http://<CNAME AWS's ELB> -H 'Host:webtest1.kuberneteslabthailand.com'
+	curl http://<CNAME AWS's ELB> -H 'Host:webtest2.kuberneteslabthailand.com'
+
+30. (Master) Delete Ingress by command:
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/ingress_webtest.yml
+	
+31. (Master) Clean Up Lab:
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/webtest_deploy.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/webtest_deploy2.yml
+
+32. (Master) Install cert-manager for kubernetes:
+    kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.7.1/cert-manager.yaml
+    watch kubectl get all -n=cert-manager

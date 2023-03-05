@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingresswebtesttls
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - webtest1.kuberneteslabthailand.com
+    secretName: webtest1secret
+  - hosts:
+    - webtest2.kuberneteslabthailand.com
+    secretName: webtest2secret
+  rules:
+  - host: webtest1.kuberneteslabthailand.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: webtest1
+            port:
+              number: 80
+  - host: webtest2.kuberneteslabthailand.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: webtest2
+            port:
+              number: 80

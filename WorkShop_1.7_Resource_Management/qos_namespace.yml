@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: qos-namespace
+  labels:
+    name: qos-namespace
+    owner: Praparn_L
+    version: "1.0"
+    module: NameSpace
+    environment: development

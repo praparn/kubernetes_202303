@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: namespace-psa
+  labels:
+    name: namespace-psa
+    owner: Praparn_L
+    version: "1.0"
+    module: NameSpace
+    environment: development
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.23
+
+    # We are setting these to our _desired_ `enforce` level.
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: v1.23
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: v1.23
