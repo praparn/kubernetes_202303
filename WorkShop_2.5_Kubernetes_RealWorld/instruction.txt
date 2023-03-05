@@ -80,7 +80,7 @@ tmux new -s Lab
 4. (Master) Prepare configuration for initial kubernetes master
     (run export environment)
 	cd ~
-	curl https://raw.githubusercontent.com/praparn/sourcesetup/master/kubernetes_initial/version124/kubeadm-init.yaml > ~/kubeadm-init.yaml
+	curl https://raw.githubusercontent.com/praparn/sourcesetup/master/kubernetes_initial/version126/kubeadm-init.yaml > ~/kubeadm-init.yaml
   	sed -i -e "s/2.2.2.2/$HostnameMaster1/g" ~/kubeadm-init.yaml
   	sed -i -e "s/hostnamemaster/$HostnameMaster1/g" ~/kubeadm-init.yaml
   	sed -i -e "s/KubernetesClusterName/$ClusterName/g" ~/kubeadm-init.yaml
@@ -175,7 +175,7 @@ UDP  ip-10-96-0-10.ap-southeast-1 rr
 14. (Worker1) Prepare configuration for initial kubernetes worker:
 (run export environment)
 cd ~
-curl https://raw.githubusercontent.com/praparn/sourcesetup/master/kubernetes_initial/version124/kubeadm-join-worker.yaml > ~/kubeadm-join-worker.yaml
+curl https://raw.githubusercontent.com/praparn/sourcesetup/master/kubernetes_initial/version126/kubeadm-join-worker.yaml > ~/kubeadm-join-worker.yaml
 sed -i -e "s/hostnamelb/$HostnameMaster1/g" ~/kubeadm-join-worker.yaml
 sed -i -e "s/token: tokenid/token: $tokenid/g" ~/kubeadm-join-worker.yaml
 sed -i -e "s/sha256:cahash/$cacerhash/g" ~/kubeadm-join-worker.yaml
@@ -191,7 +191,7 @@ htop
 16. (Worker2) Prepare configuration for initial kubernetes worker:
 (run export environment)
 cd ~
-curl https://raw.githubusercontent.com/praparn/sourcesetup/master/kubernetes_initial/version124/kubeadm-join-worker.yaml > ~/kubeadm-join-worker.yaml
+curl https://raw.githubusercontent.com/praparn/sourcesetup/master/kubernetes_initial/version126/kubeadm-join-worker.yaml > ~/kubeadm-join-worker.yaml
 sed -i -e "s/hostnamelb/$HostnameMaster1/g" ~/kubeadm-join-worker.yaml
 sed -i -e "s/token: tokenid/token: $tokenid/g" ~/kubeadm-join-worker.yaml
 sed -i -e "s/sha256:cahash/$cacerhash/g" ~/kubeadm-join-worker.yaml
