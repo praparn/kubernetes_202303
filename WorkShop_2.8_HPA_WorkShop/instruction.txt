@@ -2,7 +2,7 @@
 Part0: Install Metric Server
 ====================================================
 1. (Master) Create Metric Server:
-	kubectl apply -f https://raw.githubusercontent.com/praparn/kubernetes_202205/main/WorkShop_2.8_HPA_WorkShop/components.yaml
+	kubectl apply -f https://raw.githubusercontent.com/praparn/kubernetes_202303/main/WorkShop_2.8_HPA_WorkShop/components.yaml
 	kubectl get pods -n=kube-system
 	kubectl logs pods/<metrics's pods name> -n=kube-system
 
@@ -12,7 +12,7 @@ Part0: Install Metric Server
 Part 1: HPA Configuration:
 ====================================================
 1. Create Application by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.8_HPA_WorkShop/webtest_deploy_hpa.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.8_HPA_WorkShop/webtest_deploy_hpa.yml
 	 
 2. Check Pods status by command:
 	kubectl get deployment/webtest -o wide
@@ -22,7 +22,7 @@ Part 1: HPA Configuration:
 	curl http://<Public IP of Any Node>:32500
 
 4. Apply HPA by command:
-    kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.8_HPA_WorkShop/webtest_hpa.yml
+    kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.8_HPA_WorkShop/webtest_hpa.yml
     ----------------------------------------------
 	Case manual:
 	kubectl autoscale deployment/webtest --min=1 --max=10 --cpu-percent=10 
@@ -52,5 +52,5 @@ Part 1: HPA Configuration:
 
 10. Cleanup lab by command:
 	kubectl delete pods/load-generator
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.8_HPA_WorkShop/webtest_hpa.yml
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.8_HPA_WorkShop/webtest_deploy_hpa.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.8_HPA_WorkShop/webtest_hpa.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.8_HPA_WorkShop/webtest_deploy_hpa.yml

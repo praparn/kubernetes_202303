@@ -27,7 +27,7 @@ Link for download:
 
 4. Clone workshop to aws machine by command: 
     cd ~/
-    git clone https://github.com/praparn/kubernetes_202205.git
+    git clone https://github.com/praparn/kubernetes_202303.git
 
 5. Check module for IPVS by command:
     sudo lsmod | grep -e ip_vs -e nf_conntrack_ipv4
@@ -45,7 +45,7 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
 
 6. Initial kubernetes by command:
     sudo su -
-    kubeadm init --config /home/ubuntu/kubernetes_202205/WorkShop_1.1_Install_Kubernetes/kubeadm-init-basic-containerd.yaml
+    kubeadm init --config /home/ubuntu/kubernetes_202303/WorkShop_1.1_Install_Kubernetes/kubeadm-init-basic-containerd.yaml
     exit
 
 7. Setup credential for regular user by command:
@@ -63,7 +63,7 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
     cilium status
     -----------------------------------------------
     Optional: Case we need to install via calico
-    kubectl apply -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.5_Kubernetes_RealWorld/calico_tuning.yaml
+    kubectl apply -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.5_Kubernetes_RealWorld/calico_tuning.yaml
     -----------------------------------------------
 
 9. Check IPVS mode on kube-proxy by command:
@@ -94,7 +94,7 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
     kubectl delete pods/webtest
     kubectl delete svc/webtest
 
-15. Now all workshop is on "/home/ubuntu/kubernetes_202205"
+15. Now all workshop is on "/home/ubuntu/kubernetes_202303"
 
 
 *Remark: In case you need to reinitial all this lab again please kindly following command below (*Warnning: This will reset all lab that you had been operate before)

@@ -4,7 +4,7 @@ Instructor for Monitor Kubernetes Farm with Prometheus and Grafana:
 Part1: Create Application and Service for Operate
 ====================================================
 1. (Master) Create HPA by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.8_HPA_WorkShop/webtest_deploy_hpa.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.8_HPA_WorkShop/webtest_deploy_hpa.yml
 	 
 2. (Master) Check Pods status by command:
 	kubectl get deployment/webtest -o wide

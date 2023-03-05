@@ -5,12 +5,12 @@ Part0: Create Dashboard
 ====================================================
 1. Create Dashboard by command:
 	kubectl create namespace kubernetes-dashboard
-	kubectl create secret generic kubernetes-dashboard-certs --from-file=$HOME/kubernetes_202205/WorkShop_1.7_Resource_Management/cert -n kubernetes-dashboard
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/dashboard-restrict.yml
+	kubectl create secret generic kubernetes-dashboard-certs --from-file=$HOME/kubernetes_202303/WorkShop_1.7_Resource_Management/cert -n kubernetes-dashboard
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/dashboard-restrict.yml
 	watch kubectl get all -n=kubernetes-dashboard
 	
 2. Check Bearer Token for access by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/user-restrict.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/user-restrict.yml
 	kubectl get secret -n kubernetes-dashboard 
 	kubectl describe secret <admin-user-token-xxx> -n kubernetes-dashboard
 	*Remark: Record Token:
@@ -33,8 +33,8 @@ Part1: Container level configuration:
 1. Get command prompt for access folder workshop 1.7 by command :cd /xxxx/WorkShop_1.7_Resource_Management_and_HPA
 2. Check file on WorkShop
 3. Create Pods/Cadvisor by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_pod.yml
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/cadvisor_deploy.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_pod.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/cadvisor_deploy.yml
 	kubectl get pods --show-labels
 
 4. Open another shell for access by command:
@@ -67,21 +67,21 @@ Part1: Container level configuration:
 	kubectl describe node
 
 10. Cancel all work load and Delete Pods by command:
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_pod.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_pod.yml
 
 ====================================================
 Part 2: Name space level configuration:
 ====================================================
 
 1. Create Namespace by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_namespace.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_namespace.yml
 
 2. Create Quota and attach to Namespace and view describe by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_quota.yml  --namespace=webtest-namespace
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_quota.yml  --namespace=webtest-namespace
 	kubectl describe namespace/webtest-namespace
 
 3. Try to create deployment by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_deploy.yml   --namespace=webtest-namespace
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_deploy.yml   --namespace=webtest-namespace
 
 4. Check completeness of deployment/rs/pods/svc by command:
 	kubectl get deployment/webtest --namespace=webtest-namespace
@@ -94,12 +94,12 @@ Part 2: Name space level configuration:
 	kubectl describe rs --namespace=webtest-namespace
 
 6. Create LimitRange attach to Namespace and view descibe by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_limit.yml  --namespace=webtest-namespace
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_limit.yml  --namespace=webtest-namespace
 	kubectl describe namespace/webtest-namespace
 
 7. Recreate Deployment by command:
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_deploy.yml  --namespace=webtest-namespace
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_deploy.yml   --namespace=webtest-namespace
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_deploy.yml  --namespace=webtest-namespace
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_deploy.yml   --namespace=webtest-namespace
 
 8. Check completeness of deployment/rs/pods/svc by command:
 	kubectl get deployment/webtest --namespace=webtest-namespace
@@ -124,34 +124,34 @@ Part 2: Name space level configuration:
 	kubectl describe pods <pods name> --namespace=webtest-namespace
 
 12. Clean up lab by command: 
-    kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_deploy.yml --namespace=webtest-namespace
-    kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/cadvisor_deploy.yml
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_namespace.yml
+    kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_deploy.yml --namespace=webtest-namespace
+    kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/cadvisor_deploy.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_namespace.yml
 
 ====================================================
 Part 3: Qos configuration:
 ====================================================
 
 1. Create Namespace for QoS by command:
-    kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/qos_namespace.yml
+    kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/qos_namespace.yml
 
 2. Create Pods for Guaranteed Qos by command:
-    kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_pod_guaranteed.yml
+    kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_pod_guaranteed.yml
 
 3. Check output qos for pods and cleanup by command:
     kubectl describe pods/webtest --namespace=qos-namespace
-    kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_pod_guaranteed.yml
+    kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_pod_guaranteed.yml
 
 4. Create Pods for Burstable Qos by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_pod_burstable.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_pod_burstable.yml
 
 5. Check output qos for pods and cleanup by command:
     kubectl describe pods/webtest --namespace=qos-namespace
-    kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_pod_burstable.yml
+    kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_pod_burstable.yml
 
 6. Create Pods for Besteffort Qos by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_pod_besteffort.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_pod_besteffort.yml
 
 7. Check output qos for pods and cleanup by command:
     kubectl describe pods/webtest --namespace=qos-namespace
-    kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/webtest_pod_besteffort.yml
+    kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/webtest_pod_besteffort.yml

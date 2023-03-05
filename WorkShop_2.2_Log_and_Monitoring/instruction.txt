@@ -9,7 +9,7 @@ Part1: Container Logging:
 2. Check File on WorkShop
 
 3. Create Database Deployment by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.2_Log_and_Monitoring/databasemodule_deploy.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.2_Log_and_Monitoring/databasemodule_deploy.yml
 	kubectl get deployment/maindb
 	kubectl get rs
 	kubectl get pods
@@ -22,7 +22,7 @@ Part1: Container Logging:
 	kubectl logs pods/<pods name> -c maindb
 
 6. Create WebModule Deployment by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.2_Log_and_Monitoring/webmodule_deploy.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.2_Log_and_Monitoring/webmodule_deploy.yml
 	kubectl get deployment/web
 	kubectl get rs
 	kubectl get pods
@@ -52,5 +52,5 @@ Part1: Container Logging:
 	http://<Public IP>:12000
 
 12. Cleanup lab by command:
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.2_Log_and_Monitoring/databasemodule_deploy.yml
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.2_Log_and_Monitoring/webmodule_deploy.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.2_Log_and_Monitoring/databasemodule_deploy.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.2_Log_and_Monitoring/webmodule_deploy.yml

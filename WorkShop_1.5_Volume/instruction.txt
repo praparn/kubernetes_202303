@@ -6,7 +6,7 @@ Volume by HostPath:
 1. Get command prompt for access folder workshop 1.5 by command :cd /xxxx/WorkShop_1.5_Volume
 2. Check file on WorkShop
 3. Create Deployment for cAdvisor by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.5_Volume/cadvisor_deploy.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.5_Volume/cadvisor_deploy.yml
 
 4. Check result on web browser:
 	http://<Public IP>:31000
@@ -21,7 +21,7 @@ Volume by HostPath:
   sudo ls /var/lib/containerd ==> check for "test_cAdvisor.txt"
 
 7. Create Another Deployment with mount same volume:
-  kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.5_Volume/webtest_pod.yml
+  kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.5_Volume/webtest_pod.yml
 
 8. Access "WebTest Pods" and Check/Create file by command:
 	kubectl exec -it webtest sh
@@ -37,5 +37,5 @@ Volume by HostPath:
   exit
 
 10. Cleanup by command:
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.5_Volume/webtest_pod.yml
-  kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.5_Volume/cadvisor_deploy.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.5_Volume/webtest_pod.yml
+  kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.5_Volume/cadvisor_deploy.yml

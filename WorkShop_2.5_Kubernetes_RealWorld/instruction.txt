@@ -14,8 +14,8 @@ Note: This instruction will start lab for kubernetes's cluster for real workshop
 	*Optional1: For clean workshop and initial lab*
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	cd ~
-	rm -rf kubernetes_202205/
-	git clone https://github.com/praparn/kubernetes_202205.git
+	rm -rf kubernetes_202303/
+	git clone https://github.com/praparn/kubernetes_202303.git
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	*Optional2: Check for module enable (IF not run script below for enable)
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ UDP  ip-10-96-0-10.ap-southeast-1 rr
 	cilium status
 	-----------------------------------------------
     Optional: Case we need to install via calico
-    kubectl apply -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.5_Kubernetes_RealWorld/calico_tuning.yaml
+    kubectl apply -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.5_Kubernetes_RealWorld/calico_tuning.yaml
     -----------------------------------------------
 
 10. (Master) Check master readiness and dns by command and enable hubble ui (Take 5 - 10 min):
@@ -149,12 +149,12 @@ UDP  ip-10-96-0-10.ap-southeast-1 rr
 ========================================  Create Dashboard =====================================================================
 11. (Master) Create Dashboard by command:
 	kubectl create namespace kubernetes-dashboard
-	kubectl create secret generic kubernetes-dashboard-certs --from-file=$HOME/kubernetes_202205/WorkShop_1.7_Resource_Management/cert -n kubernetes-dashboard
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/dashboard-restrict.yml
+	kubectl create secret generic kubernetes-dashboard-certs --from-file=$HOME/kubernetes_202303/WorkShop_1.7_Resource_Management/cert -n kubernetes-dashboard
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/dashboard-restrict.yml
 	watch kubectl get all -n=kubernetes-dashboard
 
 12. (Master) Check Bearer Token for access by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.7_Resource_Management/user-restrict.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/user-restrict.yml
 	kubectl get secret -n kubernetes-dashboard
 	kubectl describe secret <admin-user-token-xxx> -n kubernetes-dashboard
 	*Remark: Record Token:
@@ -292,9 +292,9 @@ kubectl delete svc/webtest
 
 27. (Master) Create ingress set:
 	27.1. Create NLB ingress on aws resource by command: 
-	kubectl apply -f ~/kubernetes_202205/WorkShop_2.5_Kubernetes_RealWorld/ingress-nginx/deploy/static/provider/aws/deploy.yaml
+	kubectl apply -f ~/kubernetes_202303/WorkShop_2.5_Kubernetes_RealWorld/ingress-nginx/deploy/static/provider/aws/deploy.yaml
 	*Remark: If you need to modified config. Edit this file first
-	more ~/kubernetes_202205/WorkShop_2.5_Kubernetes_RealWorld/ingress-nginx/deploy/static/provider/aws/deploy.yaml
+	more ~/kubernetes_202303/WorkShop_2.5_Kubernetes_RealWorld/ingress-nginx/deploy/static/provider/aws/deploy.yaml
 ========================================
 Example:
 [...]
@@ -336,14 +336,14 @@ ingress-nginx-controller-admission   ClusterIP      10.97.28.203   <none>       
 
 28. (Master) Test deploy ingress service
 # Create Service/Pods/Deployment for webtest1 and webtest2 by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/webtest_deploy.yml
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/webtest_deploy2.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.3_Ingress_Network/webtest_deploy.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.3_Ingress_Network/webtest_deploy2.yml
 
 # View service for connection by command:
 	kubectl get svc -o wide
 
 # Create ingress for access by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/ingress_webtest.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.3_Ingress_Network/ingress_webtest.yml
 	kubectl get ing -o wide
 	kubectl describe ing/ingresswebtest
 
@@ -352,11 +352,11 @@ ingress-nginx-controller-admission   ClusterIP      10.97.28.203   <none>       
 	curl http://<CNAME AWS's ELB> -H 'Host:webtest2.kuberneteslabthailand.com'
 
 30. (Master) Delete Ingress by command:
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/ingress_webtest.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.3_Ingress_Network/ingress_webtest.yml
 	
 31. (Master) Clean Up Lab:
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/webtest_deploy.yml
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.3_Ingress_Network/webtest_deploy2.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.3_Ingress_Network/webtest_deploy.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.3_Ingress_Network/webtest_deploy2.yml
 
 32. (Master) Install cert-manager for kubernetes:
     kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.7.1/cert-manager.yaml

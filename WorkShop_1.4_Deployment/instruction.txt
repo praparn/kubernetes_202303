@@ -6,12 +6,12 @@ Note: This instruction will demonstrate about how to use Deployment/RS for deplo
 2. Check File on WorkShop
 
 3. Create Deployment and check status by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.4_Deployment/webtest_deploy.yml --record=true
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.4_Deployment/webtest_deploy.yml --record=true
 	kubectl get deployment
 	kubectl get pods --show-labels
 
 4. Create Service and check status by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.4_Deployment/webtest_svc.yml
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.4_Deployment/webtest_svc.yml
 	kubectl get svc
 	---------------------------------------------------
 	Example: Port mapping outside on TCP:32500
@@ -72,7 +72,7 @@ Note: This instruction will demonstrate about how to use Deployment/RS for deplo
 	---------------------------------------------------
 	deployment.extensions/webtest 
 	REVISION  CHANGE-CAUSE
-	1         kubectl create --filename=https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.4_Deployment/webtest_deploy.yml --record=true
+	1         kubectl create --filename=https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.4_Deployment/webtest_deploy.yml --record=true
 	2         kubectl set image deployment/webtest webtest=labdocker/cluster:webservicelite_v1.51rc --record=true
 	3         kubectl set image deployment/webtest webtest=labdocker/cluster:webservicelite_v1.8ga --record=true
 	---------------------------------------------------
@@ -94,5 +94,5 @@ Note: This instruction will demonstrate about how to use Deployment/RS for deplo
 	kubectl get rs
 
 21. Cleanup Lab by command:
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.4_Deployment/webtest_deploy.yml
-	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_1.4_Deployment/webtest_svc.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.4_Deployment/webtest_deploy.yml
+	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.4_Deployment/webtest_svc.yml
