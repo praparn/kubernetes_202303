@@ -1,19 +1,10 @@
 Link for download:
 1. Check LABSheet on google drive for check information about your machine and your key
 
-2. Install pre-requiste binary as detail below:
-  #Cilium Cli
-  curl -L --remote-name-all https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz{,.sha256sum}
-  sha256sum --check cilium-linux-amd64.tar.gz.sha256sum
-  sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
-  rm cilium-linux-amd64.tar.gz{,.sha256sum}
-
-  #Hubble Cli
-  export HUBBLE_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt)
-  curl -L --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-amd64.tar.gz{,.sha256sum}
-  sha256sum --check hubble-linux-amd64.tar.gz.sha256sum
-  sudo tar xzvfC hubble-linux-amd64.tar.gz /usr/local/bin
-  rm hubble-linux-amd64.tar.gz{,.sha256sum}
+2. Install pre-requiste helm as detail below:
+   curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+   chmod 700 get_helm.sh
+   ./get_helm.sh
 
 3. Test docker command by running: 
     sudo ctr --version
@@ -55,13 +46,18 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
     sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   	sudo chown $(id -u):$(id -g) $HOME/.kube/config
 	kubectl taint nodes --all node-role.kubernetes.io/master-
+    kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
-8. Install cilium network component by command:
-    cilium install
-    cilium status
+8. Install calico network component by command:
+   8.1 Install operator and CRD by command: 
+     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
+
+   8.2 Install calico default setting by command:
+     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
+
+   8.3 Check status of pods by command:
     watch kubectl get pods --all-namespaces
-    cilium hubble enable --ui
-    cilium status
+
 
 9. Check IPVS mode on kube-proxy by command:
     kubectl get pods -n kube-system ==> Record kube-proxy name
