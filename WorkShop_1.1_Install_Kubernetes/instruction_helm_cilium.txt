@@ -58,12 +58,28 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
     kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
 8. Install cilium network component by command:
+   curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+   chmod 700 get_helm.sh
+   ./get_helm.sh
+
+   helm repo add cilium https://helm.cilium.io/ && helm repo update
+
+   helm install cilium cilium/cilium --version 1.13.0   --namespace kube-system --version 1.13.0 --set cluster.id=0,cluster.name=kuberneteslab,encryption.nodeEncryption=false,kubeProxyReplacement=disabled,operator.replicas=1,serviceAccounts.cilium.name=cilium,serviceAccounts.operator.name=cilium-operator,tunnel=vxlan
+
+   helm install --namespace kube-system cilium cilium/cilium --version 1.13.0 --set cluster.id=0,cluster.name=kuberneteslab,encryption.nodeEncryption=false,kubeProxyReplacement=disabled,operator.replicas=1,serviceAccounts.cilium.name=cilium,serviceAccounts.operator.name=cilium-operator,tunnel=vxlan
+
+   helm template --namespace kube-system cilium cilium/cilium --version 1.13.0 --set cluster.id=0,cluster.name=kuberneteslab,encryption.nodeEncryption=false,kubeProxyReplacement=disabled,operator.replicas=1,serviceAccounts.cilium.name=cilium,serviceAccounts.operator.name=cilium-operator,tunnel=vxlan
+
     cilium install
-    cilium status --wait
+    cilium status
     watch kubectl get pods --all-namespaces
     cilium hubble enable --ui
     cilium status
-    
+    -----------------------------------------------
+    Optional: Case we need to install via calico
+    kubectl apply -f https://raw.githubusercontent.com/praparn/kubernetes_202205/master/WorkShop_2.5_Kubernetes_RealWorld/calico_tuning.yaml
+    -----------------------------------------------
+
 9. Check IPVS mode on kube-proxy by command:
     kubectl get pods -n kube-system ==> Record kube-proxy name
     kubectl logs kube-proxy-<XXXX> -n kube-system

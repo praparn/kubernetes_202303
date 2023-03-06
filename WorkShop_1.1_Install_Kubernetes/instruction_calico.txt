@@ -1,19 +1,10 @@
 Link for download:
 1. Check LABSheet on google drive for check information about your machine and your key
 
-2. Install pre-requiste binary as detail below:
-  #Cilium Cli
-  curl -L --remote-name-all https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz{,.sha256sum}
-  sha256sum --check cilium-linux-amd64.tar.gz.sha256sum
-  sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
-  rm cilium-linux-amd64.tar.gz{,.sha256sum}
-
-  #Hubble Cli
-  export HUBBLE_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt)
-  curl -L --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-amd64.tar.gz{,.sha256sum}
-  sha256sum --check hubble-linux-amd64.tar.gz.sha256sum
-  sudo tar xzvfC hubble-linux-amd64.tar.gz /usr/local/bin
-  rm hubble-linux-amd64.tar.gz{,.sha256sum}
+2. Install pre-requiste helm as detail below:
+   curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+   chmod 700 get_helm.sh
+   ./get_helm.sh
 
 3. Test docker command by running: 
     sudo ctr --version
@@ -27,7 +18,7 @@ Link for download:
 
 4. Clone workshop to aws machine by command: 
     cd ~/
-    git clone https://github.com/praparn/kubernetes_202205.git
+    git clone https://github.com/praparn/kubernetes_202303.git
 
 5. Check module for IPVS by command:
     sudo lsmod | grep -e ip_vs -e nf_conntrack_ipv4
@@ -46,7 +37,7 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
 6. Initial kubernetes by command:
     sudo su -
     curl https://raw.githubusercontent.com/praparn/sourcesetup/master/kubernetes_initial/version126/kubeadm-init-basic-containerd.yaml > /tmp/kubeadm-init-basic-containerd.yaml
-    kubeadm init --config /tmp/kubeadm-init-basic-containerd.yaml    
+    kubeadm init --config /tmp/kubeadm-init-basic-containerd.yaml
     exit
 
 7. Setup credential for regular user by command:
@@ -57,13 +48,16 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
 	kubectl taint nodes --all node-role.kubernetes.io/master-
     kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
-8. Install cilium network component by command:
-    cilium install
-    cilium status --wait
+8. Install calico network component by command:
+   8.1 Install operator and CRD by command: 
+     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
+
+   8.2 Install calico default setting by command:
+     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
+
+   8.3 Check status of pods by command:
     watch kubectl get pods --all-namespaces
-    cilium hubble enable --ui
-    cilium status
-    
+
 9. Check IPVS mode on kube-proxy by command:
     kubectl get pods -n kube-system ==> Record kube-proxy name
     kubectl logs kube-proxy-<XXXX> -n kube-system
@@ -81,7 +75,7 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
     kubectl get pods -o wide
     kubectl expose pods webtest --target-port=443 --type=NodePort
     kubectl get svc -o wide                                               ==> Record Public Port
-    curl ifconfig.co
+    curl ifconfig.me
 
 13. Test access web endpoint by command:
     https://<Public IP>:<Port>
@@ -92,12 +86,12 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
     kubectl delete pods/webtest
     kubectl delete svc/webtest
 
-15. Now all workshop is on "/home/ubuntu/kubernetes_202205"
+15. Now all workshop is on "/home/ubuntu/kubernetes_202303"
 
 
 *Remark: In case you need to reinitial all this lab again please kindly following command below (*Warnning: This will reset all lab that you had been operate before)
-    cilium hubble disable
-    cilium uninstall --wait
+    kubectl delete -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
+    kubectl delete -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
     sudo su -
     kubeadm reset
 	rm -rf /var/lib/etcd
