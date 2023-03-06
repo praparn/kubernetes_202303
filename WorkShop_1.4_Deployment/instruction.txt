@@ -6,8 +6,9 @@ Note: This instruction will demonstrate about how to use Deployment/RS for deplo
 2. Check File on WorkShop
 
 3. Create Deployment and check status by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.4_Deployment/webtest_deploy.yml --record=true
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.4_Deployment/webtest_deploy.yml
 	kubectl get deployment
+	kubectl annotate deployment webtest kubernetes.io/change-cause="First Release version 1.0" --overwrite=true
 	kubectl get pods --show-labels
 
 4. Create Service and check status by command:
@@ -33,6 +34,7 @@ Note: This instruction will demonstrate about how to use Deployment/RS for deplo
 
 8. Update version of image on deployment by command:
 	kubectl set image deployment/webtest webtest=labdocker/cluster:webservicelite_v1.51rc --record=true
+	kubectl annotate deployment webtest kubernetes.io/change-cause="Second Release version 1.5" --overwrite=true
 
 9. Check rollout status by command:
 	kubectl rollout status deployment/webtest
@@ -47,6 +49,7 @@ Note: This instruction will demonstrate about how to use Deployment/RS for deplo
 
 12. Update version of image on deployment by command:
 	kubectl set image deployment/webtest webtest=labdocker/cluster:webservicelite_v1.8ga --record=true
+	kubectl annotate deployment webtest kubernetes.io/change-cause="Third Release version 1.8ga" --overwrite=true
 
 13. Check rollout status by command:
 	kubectl rollout pause deployment/webtest
@@ -70,11 +73,12 @@ Note: This instruction will demonstrate about how to use Deployment/RS for deplo
 	---------------------------------------------------
 	Example: History Result
 	---------------------------------------------------
-	deployment.extensions/webtest 
-	REVISION  CHANGE-CAUSE
-	1         kubectl create --filename=https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.4_Deployment/webtest_deploy.yml --record=true
-	2         kubectl set image deployment/webtest webtest=labdocker/cluster:webservicelite_v1.51rc --record=true
-	3         kubectl set image deployment/webtest webtest=labdocker/cluster:webservicelite_v1.8ga --record=true
+	ubuntu@ip-10-      kubectl rollout history deployment/webtestyment/webtest
+deployment.apps/webtest 
+REVISION  CHANGE-CAUSE
+1         First Release version 1.0
+2         Second Release version 1.5
+3         Third Release version 1.8ga
 	---------------------------------------------------
 
 17. Rollback revision "2" of rollout with command:
@@ -89,6 +93,7 @@ Note: This instruction will demonstrate about how to use Deployment/RS for deplo
 
 20. Test RevisionHistoryLimit by apply next version by command:
     kubectl set image deployment/webtest webtest=labdocker/cluster:webservicelite_v1 --record=true
+	kubectl annotate deployment webtest kubernetes.io/change-cause="Fourth Release version 1.0" --overwrite=true
 	kubectl rollout status deployment/webtest
 	kubectl rollout history deployment/webtest
 	kubectl get rs

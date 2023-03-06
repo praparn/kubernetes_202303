@@ -58,7 +58,6 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
    8.3 Check status of pods by command:
     watch kubectl get pods --all-namespaces
 
-
 9. Check IPVS mode on kube-proxy by command:
     kubectl get pods -n kube-system ==> Record kube-proxy name
     kubectl logs kube-proxy-<XXXX> -n kube-system
@@ -76,7 +75,7 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
     kubectl get pods -o wide
     kubectl expose pods webtest --target-port=443 --type=NodePort
     kubectl get svc -o wide                                               ==> Record Public Port
-    curl ifconfig.co
+    curl ifconfig.me
 
 13. Test access web endpoint by command:
     https://<Public IP>:<Port>
@@ -91,8 +90,8 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
 
 
 *Remark: In case you need to reinitial all this lab again please kindly following command below (*Warnning: This will reset all lab that you had been operate before)
-    cilium hubble disable
-    cilium uninstall --wait
+    kubectl delete -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
+    kubectl delete -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
     sudo su -
     kubeadm reset
 	rm -rf /var/lib/etcd

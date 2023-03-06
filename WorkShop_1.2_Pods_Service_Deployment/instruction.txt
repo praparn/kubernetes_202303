@@ -45,12 +45,7 @@ sudo ctr image pull docker.io/labdocker/cadvisor:latest
 7. Check log from Pods by command:
 	kubectl logs webtest -c webtest
 
-8. Test access to container in Pods by command:
-	kubectl exec -it webtest -c webtest sh
-	more mainlite.py
-	exit
-
-9. Clear environment by delete Pods and service by command:
+8. Clear environment by delete Pods and service by command:
 	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.2_Pods_Service_Deployment/singlecontainer/webtest_pod.yml
 	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.2_Pods_Service_Deployment/singlecontainer/webtest_svc.yml
 
