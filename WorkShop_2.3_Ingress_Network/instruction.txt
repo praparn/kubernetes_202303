@@ -61,7 +61,7 @@ ingress-nginx-controller-67897c9494-gbznd   1/1     Running     0          58s
 ========================================
 
 	0.3 Test open browser: (404 Not Found was expected):
-		curl ifconfig.co
+		curl ifconfig.me
 		curl http://<private ip>:30100 / Webbrowser
 
 1. Create Service/Pods/Deployment for webtest1 and webtest2 by command:
@@ -93,7 +93,7 @@ _L,version=1.0
 	kubectl describe ing/ingresswebtest
 
 5. Check Your Public IP Address by command:
-	curl https://ifconfig.co/
+	curl https://ifconfig.me/
 
 6. Add Hosts (/etc/hosts) or (c:\windows\system32\driver\etc\hosts) with minikube ip by command:
 	For Windows:
