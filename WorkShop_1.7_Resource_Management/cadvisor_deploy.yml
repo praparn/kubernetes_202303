@@ -62,7 +62,7 @@ spec:
             name: volsys
           - mountPath: /var/lib/docker/
             name: voldocker
-          image: labdocker/cadvisor:latest
+          image: gcr.io/cadvisor/cadvisor@sha256:adc29827d88730174181e9fe221938323baa6ba8c5734c2ec52aa2e86a0c303e
           ports:
           - containerPort: 8080
             protocol: TCP
