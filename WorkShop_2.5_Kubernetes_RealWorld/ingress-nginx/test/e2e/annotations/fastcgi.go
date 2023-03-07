@@ -20,8 +20,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/onsi/ginkgo"
-	"github.com/stretchr/testify/assert"
+	"github.com/onsi/ginkgo/v2"
 	corev1 "k8s.io/api/core/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -81,9 +80,7 @@ var _ = framework.DescribeAnnotation("backend-protocol - FastCGI", func() {
 			},
 		}
 
-		cm, err := f.EnsureConfigMap(configuration)
-		assert.Nil(ginkgo.GinkgoT(), err, "creating configmap")
-		assert.NotNil(ginkgo.GinkgoT(), cm, "expected a configmap but none returned")
+		f.EnsureConfigMap(configuration)
 
 		host := "fastcgi-params-configmap"
 

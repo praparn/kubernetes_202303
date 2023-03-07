@@ -27,7 +27,7 @@ Support for websockets is provided by NGINX out of the box. No special configura
 
 The only requirement to avoid the close of connections is the increase of the values of `proxy-read-timeout` and `proxy-send-timeout`.
 
-The default value of this settings is `60 seconds`.
+The default value of these settings is `60 seconds`.
 
 A more adequate value to support websockets is a value higher than one hour (`3600`).
 
@@ -36,7 +36,7 @@ A more adequate value to support websockets is a value higher than one hour (`36
 
 ## Optimizing TLS Time To First Byte (TTTFB)
 
-NGINX provides the configuration option [ssl_buffer_size](http://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_buffer_size) to allow the optimization of the TLS record size.
+NGINX provides the configuration option [ssl_buffer_size](https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_buffer_size) to allow the optimization of the TLS record size.
 
 This improves the [TLS Time To First Byte](https://www.igvita.com/2013/12/16/optimizing-nginx-tls-time-to-first-byte/) (TTTFB).
 The default value in the Ingress controller is `4k` (NGINX default is `16k`).

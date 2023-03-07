@@ -37,8 +37,8 @@ Part1: Container Logging:
 	kubectl logs pods/<pods name> -c cachedb
 
 10. Open kubenetes dashboard by command:
-	kubectl get secret -n kubernetes-dashboard 
-	kubectl describe secret <admin-user-token-xxx> -n kubernetes-dashboard ==> Record Token
+	kubectl get secret -n kubernetes-dashboard-admin | grep kubernetes-dashboard
+	kubectl describe secret kubernetes-dashboard-admin -n kubernetes-dashboard ==> Record Token
 	kubectl get pods -n=kubernetes-dashboard
 	kubectl port-forward --address 0.0.0.0 pods/<kubernetes-dashboard-xxx> 8443:8443 -n=kubernetes-dashboard
 
@@ -46,7 +46,8 @@ Part1: Container Logging:
 	https://<Public IP>:8443
 
 11. Test cilium hubble ui by command:
-    cilium hubble ui
+    kubectl get pods -n=kube-system | grep hubble-ui
+	kubectl port-forward --address 0.0.0.0 pods/<hubble-ui-xxxxxx-xxxxx> 12000:8081 -n=kube-system
 
     *Test by open browser: 
 	http://<Public IP>:12000

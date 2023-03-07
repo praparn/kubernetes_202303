@@ -40,11 +40,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/klog/v2"
 
-	"k8s.io/ingress-nginx/internal/ingress"
 	"k8s.io/ingress-nginx/internal/ingress/annotations/influxdb"
+	"k8s.io/ingress-nginx/internal/ingress/annotations/parser"
 	"k8s.io/ingress-nginx/internal/ingress/annotations/ratelimit"
 	"k8s.io/ingress-nginx/internal/ingress/controller/config"
 	ing_net "k8s.io/ingress-nginx/internal/net"
+	"k8s.io/ingress-nginx/pkg/apis/ingress"
 )
 
 const (
@@ -74,8 +75,8 @@ type Template struct {
 	bp *BufferPool
 }
 
-//NewTemplate returns a new Template instance or an
-//error if the specified template file contains errors
+// NewTemplate returns a new Template instance or an
+// error if the specified template file contains errors
 func NewTemplate(file string) (*Template, error) {
 	data, err := os.ReadFile(file)
 	if err != nil {
@@ -227,7 +228,12 @@ var (
 		"buildAuthLocation":               buildAuthLocation,
 		"shouldApplyGlobalAuth":           shouldApplyGlobalAuth,
 		"buildAuthResponseHeaders":        buildAuthResponseHeaders,
+		"buildAuthUpstreamLuaHeaders":     buildAuthUpstreamLuaHeaders,
 		"buildAuthProxySetHeaders":        buildAuthProxySetHeaders,
+		"buildAuthUpstreamName":           buildAuthUpstreamName,
+		"shouldApplyAuthUpstream":         shouldApplyAuthUpstream,
+		"extractHostPort":                 extractHostPort,
+		"changeHostPort":                  changeHostPort,
 		"buildProxyPass":                  buildProxyPass,
 		"filterRateLimits":                filterRateLimits,
 		"buildRateLimitZones":             buildRateLimitZones,
@@ -281,9 +287,10 @@ var (
 // escapeLiteralDollar will replace the $ character with ${literal_dollar}
 // which is made to work via the following configuration in the http section of
 // the template:
-// geo $literal_dollar {
-//     default "$";
-// }
+//
+//	geo $literal_dollar {
+//	    default "$";
+//	}
 func escapeLiteralDollar(input interface{}) string {
 	inputStr, ok := input.(string)
 	if !ok {
@@ -572,7 +579,14 @@ func shouldApplyGlobalAuth(input interface{}, globalExternalAuthURL string) bool
 	return false
 }
 
-func buildAuthResponseHeaders(proxySetHeader string, headers []string) []string {
+// buildAuthResponseHeaders sets HTTP response headers when `auth-url` is used.
+// Based on `auth-keepalive` value we use auth_request_set Nginx directives, or
+// we use Lua and Nginx variables instead.
+//
+// NOTE: Unfortunately auth_request module ignores the keepalive directive (see:
+// https://trac.nginx.org/nginx/ticket/1579), that is why we mimic the same
+// functionality with access_by_lua_block.
+func buildAuthResponseHeaders(proxySetHeader string, headers []string, lua bool) []string {
 	res := []string{}
 
 	if len(headers) == 0 {
@@ -580,10 +594,27 @@ func buildAuthResponseHeaders(proxySetHeader string, headers []string) []string 
 	}
 
 	for i, h := range headers {
-		hvar := strings.ToLower(h)
-		hvar = strings.NewReplacer("-", "_").Replace(hvar)
-		res = append(res, fmt.Sprintf("auth_request_set $authHeader%v $upstream_http_%v;", i, hvar))
+		if lua {
+			res = append(res, fmt.Sprintf("set $authHeader%d '';", i))
+		} else {
+			hvar := strings.ToLower(h)
+			hvar = strings.NewReplacer("-", "_").Replace(hvar)
+			res = append(res, fmt.Sprintf("auth_request_set $authHeader%v $upstream_http_%v;", i, hvar))
+		}
 		res = append(res, fmt.Sprintf("%s '%v' $authHeader%v;", proxySetHeader, h, i))
+	}
+	return res
+}
+
+func buildAuthUpstreamLuaHeaders(headers []string) []string {
+	res := []string{}
+
+	if len(headers) == 0 {
+		return res
+	}
+
+	for i, h := range headers {
+		res = append(res, fmt.Sprintf("ngx.var.authHeader%d = res.header['%s']", i, h))
 	}
 	return res
 }
@@ -600,6 +631,76 @@ func buildAuthProxySetHeaders(headers map[string]string) []string {
 	}
 	sort.Strings(res)
 	return res
+}
+
+func buildAuthUpstreamName(input interface{}, host string) string {
+	authPath := buildAuthLocation(input, "")
+	if authPath == "" || host == "" {
+		return ""
+	}
+
+	return fmt.Sprintf("%s-%s", host, authPath[2:])
+}
+
+// shouldApplyAuthUpstream returns true only in case when ExternalAuth.URL and
+// ExternalAuth.KeepaliveConnections are all set
+func shouldApplyAuthUpstream(l interface{}, c interface{}) bool {
+	location, ok := l.(*ingress.Location)
+	if !ok {
+		klog.Errorf("expected an '*ingress.Location' type but %T was returned", l)
+		return false
+	}
+
+	cfg, ok := c.(config.Configuration)
+	if !ok {
+		klog.Errorf("expected a 'config.Configuration' type but %T was returned", c)
+		return false
+	}
+
+	if location.ExternalAuth.URL == "" || location.ExternalAuth.KeepaliveConnections == 0 {
+		return false
+	}
+
+	// Unfortunately, `auth_request` module ignores keepalive in upstream block: https://trac.nginx.org/nginx/ticket/1579
+	// The workaround is to use `ngx.location.capture` Lua subrequests but it is not supported with HTTP/2
+	if cfg.UseHTTP2 {
+		klog.Warning("Upstream keepalive is not supported with HTTP/2")
+		return false
+	}
+
+	return true
+}
+
+// extractHostPort will extract the host:port part from the URL specified by url
+func extractHostPort(url string) string {
+	if url == "" {
+		return ""
+	}
+
+	authURL, err := parser.StringToURL(url)
+	if err != nil {
+		klog.Errorf("expected a valid URL but %s was returned", url)
+		return ""
+	}
+
+	return authURL.Host
+}
+
+// changeHostPort will change the host:port part of the url to value
+func changeHostPort(url string, value string) string {
+	if url == "" {
+		return ""
+	}
+
+	authURL, err := parser.StringToURL(url)
+	if err != nil {
+		klog.Errorf("expected a valid URL but %s was returned", url)
+		return ""
+	}
+
+	authURL.Host = value
+
+	return authURL.String()
 }
 
 // buildProxyPass produces the proxy pass string, if the ingress has redirects
@@ -691,7 +792,7 @@ rewrite "(?i)%s" %s break;
 
 func filterRateLimits(input interface{}) []ratelimit.Config {
 	ratelimits := []ratelimit.Config{}
-	found := sets.String{}
+	found := sets.Set[string]{}
 
 	servers, ok := input.([]*ingress.Server)
 	if !ok {
@@ -714,12 +815,12 @@ func filterRateLimits(input interface{}) []ratelimit.Config {
 // for connection limit by IP address, one for limiting requests per minute, and
 // one for limiting requests per second.
 func buildRateLimitZones(input interface{}) []string {
-	zones := sets.String{}
+	zones := sets.Set[string]{}
 
 	servers, ok := input.([]*ingress.Server)
 	if !ok {
 		klog.Errorf("expected a '[]*ingress.Server' type but %T was returned", input)
-		return zones.List()
+		return zones.UnsortedList()
 	}
 
 	for _, server := range servers {
@@ -758,7 +859,7 @@ func buildRateLimitZones(input interface{}) []string {
 		}
 	}
 
-	return zones.List()
+	return zones.UnsortedList()
 }
 
 // buildRateLimit produces an array of limit_req to be used inside the Path of
@@ -1177,15 +1278,17 @@ func proxySetHeader(loc interface{}) string {
 
 // buildCustomErrorDeps is a utility function returning a struct wrapper with
 // the data required to build the 'CUSTOM_ERRORS' template
-func buildCustomErrorDeps(upstreamName string, errorCodes []int, enableMetrics bool) interface{} {
+func buildCustomErrorDeps(upstreamName string, errorCodes []int, enableMetrics bool, modsecurityEnabled bool) interface{} {
 	return struct {
-		UpstreamName  string
-		ErrorCodes    []int
-		EnableMetrics bool
+		UpstreamName       string
+		ErrorCodes         []int
+		EnableMetrics      bool
+		ModsecurityEnabled bool
 	}{
-		UpstreamName:  upstreamName,
-		ErrorCodes:    errorCodes,
-		EnableMetrics: enableMetrics,
+		UpstreamName:       upstreamName,
+		ErrorCodes:         errorCodes,
+		EnableMetrics:      enableMetrics,
+		ModsecurityEnabled: modsecurityEnabled,
 	}
 }
 
@@ -1551,7 +1654,7 @@ func buildModSecurityForLocation(cfg config.Configuration, location *ingress.Loc
 func buildMirrorLocations(locs []*ingress.Location) string {
 	var buffer bytes.Buffer
 
-	mapped := sets.String{}
+	mapped := sets.Set[string]{}
 
 	for _, loc := range locs {
 		if loc.Mirror.Source == "" || loc.Mirror.Target == "" {
@@ -1565,10 +1668,11 @@ func buildMirrorLocations(locs []*ingress.Location) string {
 		mapped.Insert(loc.Mirror.Source)
 		buffer.WriteString(fmt.Sprintf(`location = %v {
 internal;
+proxy_set_header Host %v;
 proxy_pass %v;
 }
 
-`, loc.Mirror.Source, loc.Mirror.Target))
+`, loc.Mirror.Source, loc.Mirror.Host, loc.Mirror.Target))
 	}
 
 	return buffer.String()
@@ -1628,7 +1732,7 @@ func buildServerName(hostname string) string {
 	return `~^(?<subdomain>[\w-]+)\.` + strings.Join(parts, "\\.") + `$`
 }
 
-// parseComplexNGINXVar parses things like "$my${complex}ngx\$var" into
+// parseComplexNginxVarIntoLuaTable parses things like "$my${complex}ngx\$var" into
 // [["$var", "complex", "my", "ngx"]]. In other words, 2nd and 3rd elements
 // in the result are actual NGINX variable names, whereas first and 4th elements
 // are string literals.

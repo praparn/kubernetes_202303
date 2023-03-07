@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/assert"
 	pool "gopkg.in/go-playground/pool.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,7 +39,7 @@ var _ = framework.IngressNginxDescribe("[Memory Leak] Dynamic Certificates", fun
 		f.NewEchoDeployment()
 	})
 
-	framework.MemoryLeakIt("should not leak memory from ingress SSL certificates or configuration updates", func() {
+	ginkgo.It("should not leak memory from ingress SSL certificates or configuration updates", func() {
 		hostCount := 1000
 		iterations := 10
 

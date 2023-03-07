@@ -20,7 +20,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/assert"
 
 	"k8s.io/ingress-nginx/test/e2e/framework"
@@ -73,5 +73,9 @@ var _ = framework.DescribeSetting("Configmap change", func() {
 				return strings.ContainsAny(cfg, "error_log  /var/log/nginx/error.log debug;")
 			})
 		assert.NotEqual(ginkgo.GinkgoT(), checksum, newChecksum)
+
+		logs, err := f.NginxLogs()
+		assert.Nil(ginkgo.GinkgoT(), err, "obtaining nginx logs")
+		assert.Contains(ginkgo.GinkgoT(), logs, "Backend successfully reloaded")
 	})
 })

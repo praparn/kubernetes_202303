@@ -39,7 +39,7 @@ var (
 	annotationCorsExposeHeaders      = parser.GetAnnotationWithPrefix("cors-expose-headers")
 	annotationCorsAllowCredentials   = parser.GetAnnotationWithPrefix("cors-allow-credentials")
 	defaultCorsMethods               = "GET, PUT, POST, DELETE, PATCH, OPTIONS"
-	defaultCorsHeaders               = "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+	defaultCorsHeaders               = "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
 	annotationAffinityCookieName     = parser.GetAnnotationWithPrefix("session-cookie-name")
 	annotationUpstreamHashBy         = parser.GetAnnotationWithPrefix("upstream-hash-by")
 	annotationCustomHTTPErrors       = parser.GetAnnotationWithPrefix("custom-http-errors")
@@ -294,48 +294,3 @@ func TestCustomHTTPErrors(t *testing.T) {
 		}
 	}
 }
-
-/*
-func TestMergeLocationAnnotations(t *testing.T) {
-	// initial parameters
-	keys := []string{"BasicDigestAuth", "CorsConfig", "ExternalAuth", "RateLimit", "Redirect", "Rewrite", "Whitelist", "Proxy", "UsePortInRedirects"}
-
-	loc := ingress.Location{}
-	annotations := &Ingress{
-		BasicDigestAuth:    &auth.Config{},
-		CorsConfig:         &cors.Config{},
-		ExternalAuth:       &authreq.Config{},
-		RateLimit:          &ratelimit.Config{},
-		Redirect:           &redirect.Config{},
-		Rewrite:            &rewrite.Config{},
-		Whitelist:          &ipwhitelist.SourceRange{},
-		Proxy:              &proxy.Config{},
-		UsePortInRedirects: true,
-	}
-
-	// create test table
-	type fooMergeLocationAnnotationsStruct struct {
-		fName string
-		er    interface{}
-	}
-	fooTests := []fooMergeLocationAnnotationsStruct{}
-	for name, value := range keys {
-		fva := fooMergeLocationAnnotationsStruct{name, value}
-		fooTests = append(fooTests, fva)
-	}
-
-	// execute test
-	MergeWithLocation(&loc, annotations)
-
-	// check result
-	for _, foo := range fooTests {
-		fv := reflect.ValueOf(loc).FieldByName(foo.fName).Interface()
-		if !reflect.DeepEqual(fv, foo.er) {
-			t.Errorf("Returned %v but expected %v for the field %s", fv, foo.er, foo.fName)
-		}
-	}
-	if _, ok := annotations[DeniedKeyName]; ok {
-		t.Errorf("%s should be removed after mergeLocationAnnotations", DeniedKeyName)
-	}
-}
-*/
