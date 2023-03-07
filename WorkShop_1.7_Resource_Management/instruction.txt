@@ -7,10 +7,10 @@ Part0: Create Dashboard
 	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/dashboard-restrict.yml
 	watch kubectl get all -n=kubernetes-dashboard
 	
-2. Check Bearer Token for access by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/user-restrict.yml
+2. Check Generic-User for access by command:
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/user-restrict-general.yml
 	kubectl get secret -n kubernetes-dashboard 
-	kubectl describe secret <admin-user-token-xxx> -n kubernetes-dashboard
+	kubectl describe secret kubernetes-dashboard -n kubernetes-dashboard
 	*Remark: Record Token:
 	Ex:
 	------------------------------------------------------------------------------------
@@ -24,6 +24,17 @@ eyJhbGciOiJSUzI1NiIsImtpZCI6IkZrTkFjN296TUxsbmFfZmU0MklfLVdUdnRjQXFyMWJ1TzFLbWRD
 
 	*Test by open browser: 
 	https://<Public IP>:8443
+
+4. Create Generic-Admin for access by command and relogin again:
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/user-restrict-admin.yml
+	kubectl get secret -n kubernetes-dashboard 
+	kubectl describe secret kubernetes-dashboard -n kubernetes-dashboard
+	*Remark: Record Token:
+	Ex:
+	------------------------------------------------------------------------------------
+eyJhbGciOiJSUzI1NiIsImtpZCI6IkZrTkFjN296TUxsbmFfZmU0MklfLVdUdnRjQXFyMWJ1TzFLbWRDckU1YncifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLXE1Z2Z2Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1MmNiZjU3NS02Y2ExLTQ3YzQtOWQwOS0zYzg1ZTlmMTkxOTEiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZXJuZXRlcy1kYXNoYm9hcmQ6YWRtaW4tdXNlciJ9.hNxqxqeLK1JxOzK4OYPLbv7FlumBkHrwjL6lDUulaMEU1Iwy1Gq9cJvrLj5dh7xec86PasEckTq1BZo63zOvGBrvjVqH4tTecepQLiY-H584V7bcaY2Ps6hr21DVQEcU_mrJ47KlPMxCbXwrARHaaTMQHIgM1MXE4e8Zsk1FBXMZR9YfxRivyBgmc77hJbbs7VExf8v5_QdJPmq-lFA2-whu4jK7kJ_wFq8Xh_aiHegKbkl61FwfgByZarZMT_dHkt4CVx5XbyvEYd_MSJH9qD0CFsXa-TKgP0MJhqJwHbI0FXpW_gG3XiKIbTK0yKrE1eCpGyvyNSnGCxdPbwWbTA
+	------------------------------------------------------------------------------------
+
 	
 ====================================================
 Part1: Container level configuration:
