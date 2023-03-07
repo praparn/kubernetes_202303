@@ -4,8 +4,6 @@ Note: This instruction will demonstrate about how to manage resouce in cluster w
 Part0: Create Dashboard
 ====================================================
 1. Create Dashboard by command:
-	kubectl create namespace kubernetes-dashboard
-	kubectl create secret generic kubernetes-dashboard-certs --from-file=$HOME/kubernetes_202303/WorkShop_1.7_Resource_Management/cert -n kubernetes-dashboard
 	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/dashboard-restrict.yml
 	watch kubectl get all -n=kubernetes-dashboard
 	

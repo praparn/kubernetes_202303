@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#apiVersion: v1
-#kind: Namespace
-#metadata:
-#  name: kubernetes-dashboard
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubernetes-dashboard
 
-#---
+---
 
 apiVersion: v1
 kind: ServiceAccount
@@ -45,14 +45,14 @@ spec:
 
 ---
 
-#apiVersion: v1
-#kind: Secret
-#metadata:
-#  labels:
-#    k8s-app: kubernetes-dashboard
-#  name: kubernetes-dashboard-certs
-#  namespace: kubernetes-dashboard
-#type: Opaque
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-certs
+  namespace: kubernetes-dashboard
+type: Opaque
 
 ---
 
@@ -190,7 +190,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: kubernetes-dashboard
-          image: kubernetesui/dashboard:v2.5.0
+          image: kubernetesui/dashboard:v2.7.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8443
@@ -275,7 +275,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: dashboard-metrics-scraper
-          image: kubernetesui/metrics-scraper:v1.0.7
+          image: kubernetesui/metrics-scraper:v1.0.8
           ports:
             - containerPort: 8000
               protocol: TCP

@@ -15,7 +15,7 @@ Link for download:
   sudo tar xzvfC hubble-linux-amd64.tar.gz /usr/local/bin
   rm hubble-linux-amd64.tar.gz{,.sha256sum}
 
-3. Test docker command by running: 
+3. Test containerd command by running: 
     sudo ctr --version
     sudo ctr image pull docker.io/library/hello-world:latest
     sudo ctr image ls
@@ -27,7 +27,7 @@ Link for download:
 
 4. Clone workshop to aws machine by command: 
     cd ~/
-    git clone https://github.com/praparn/kubernetes_202205.git
+    git clone https://github.com/praparn/kubernetes_202303.git
 
 5. Check module for IPVS by command:
     sudo lsmod | grep -e ip_vs -e nf_conntrack_ipv4
@@ -68,10 +68,10 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
     kubectl get pods -n kube-system ==> Record kube-proxy name
     kubectl logs kube-proxy-<XXXX> -n kube-system
 
-10. Check Feature-Gate Configuration:
-    Controller Server: ps -ef | grep kube-controller-manager | grep feature-gate
-    API Server: ps -ef | grep kube-apiserver | grep feature-gate
-    Scheduler: ps -ef | grep kube-scheduler | grep feature-gate
+10. Check Configuration:
+    Controller Server: ps -ef | grep kube-controller-manager
+    API Server: ps -ef | grep kube-apiserver
+    Scheduler: ps -ef | grep kube-scheduler
 
 11. Check Existing Certificate and CSR:
     sudo find /etc/kubernetes/pki/ -type f -name "*.crt" -print|egrep -v 'ca.crt$'|xargs -L 1 -t  -i bash -c 'openssl x509  -noout -text -in {}|grep After'
@@ -81,7 +81,7 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
     kubectl get pods -o wide
     kubectl expose pods webtest --target-port=443 --type=NodePort
     kubectl get svc -o wide                                               ==> Record Public Port
-    curl ifconfig.co
+    curl ifconfig.me
 
 13. Test access web endpoint by command:
     https://<Public IP>:<Port>
@@ -92,7 +92,7 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
     kubectl delete pods/webtest
     kubectl delete svc/webtest
 
-15. Now all workshop is on "/home/ubuntu/kubernetes_202205"
+15. Now all workshop is on "/home/ubuntu/kubernetes_202303"
 
 
 *Remark: In case you need to reinitial all this lab again please kindly following command below (*Warnning: This will reset all lab that you had been operate before)
