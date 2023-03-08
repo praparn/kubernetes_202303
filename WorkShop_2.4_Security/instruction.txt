@@ -137,7 +137,6 @@ kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/ma
 
 2. Check detail of namespace by command:
 kubectl describe namespace/namespace-psa
-*Remark: As current 1.23 version. PSA is still same with 1.22 policy just shift to beta
 
 3. Create deployment pods with hostpath (Expect: Failure by enforce/baseline) by command:
 kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.4_Security/psa-hostpath-pods.yml

@@ -114,12 +114,14 @@ kubeadm join 10.0.1.67:6443 --token 1ogaw7.1dx1qg34qzi6ha5t \
   	sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 	sudo chown $(id -u):$(id -g) $HOME/.kube/config
 	kubectl taint nodes --all node-role.kubernetes.io/master-
+	kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
 7. (Master) Check IPVS mode on kube-proxy by command:
     kubectl get pods -n kube-system
     kubectl logs kube-proxy-<XXXX> -n kube-system
 
 8 (Master) Check IPVS policy by ipvsadm
+	sudo apt-get install -y ipvsadm
 	sudo ipvsadm
 	-------------------------------------------------
 	Example Result:
@@ -137,33 +139,28 @@ UDP  ip-10-96-0-10.ap-southeast-1 rr
 9. (Master) Create cilium network component by command:
     cilium install
 	cilium status
-	-----------------------------------------------
-    Optional: Case we need to install via calico
-    kubectl apply -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.5_Kubernetes_RealWorld/calico_tuning.yaml
-    -----------------------------------------------
-
+	
 10. (Master) Check master readiness and dns by command and enable hubble ui (Take 5 - 10 min):
 	watch kubectl get pods --all-namespaces
-	cilium hubble enable --ui 
+	cilium hubble enable --ui
+	cilium status --wait
 
 ========================================  Create Dashboard =====================================================================
-11. (Master) Create Dashboard by command:
-	kubectl create namespace kubernetes-dashboard
-	kubectl create secret generic kubernetes-dashboard-certs --from-file=$HOME/kubernetes_202303/WorkShop_1.7_Resource_Management/cert -n kubernetes-dashboard
+11. Create Dashboard by command:
 	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/dashboard-restrict.yml
 	watch kubectl get all -n=kubernetes-dashboard
 
-12. (Master) Check Bearer Token for access by command:
-	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/user-restrict.yml
-	kubectl get secret -n kubernetes-dashboard
-	kubectl describe secret <admin-user-token-xxx> -n kubernetes-dashboard
+12. Create Generic-Admin for access by command and relogin again:
+	kubectl create -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_1.7_Resource_Management/user-restrict-admin.yml
+	kubectl get secret -n kubernetes-dashboard | grep kubernetes-dashboard-admin
+	kubectl describe secret kubernetes-dashboard-admin -n kubernetes-dashboard
 	*Remark: Record Token:
 	Ex:
 	------------------------------------------------------------------------------------
- eyJhbGciOiJSUzI1NiIsImtpZCI6ImZ6RnRXNmI3STdLR3VRS2lLSjU0LV9wU2hySzVKS1JDdXczQ2NkTmU4eVkifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLTQ0Zm1nIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI3NmNjNWRiMC0yMWRlLTQyZTItOWMxNi1lYjExZDhkMTAyNmMiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZXJuZXRlcy1kYXNoYm9hcmQ6YWRtaW4tdXNlciJ9.Eoj6wFbMpeBbBYmnWx9IbeuHHDswsboWmtsmymFmRhAy0a8ivYs-yFYpOo1rIHte4EuKwGllIHbOIdyosWnpPXF_7q_yxhjTk1tfOPAzbyIFIzggasXJwIpTQReH7pu7cHE6dd4olJYtiklfI_UotM4VvvAGpL8xaWPRx8Am9laL11LJFccmiWaw9YjQlU1-1iMzSwVKWHkX990MGGNNr0hXSQSYPHYyjaiyU1RoSRjJyhwxXhV-nneB3qDqUjJiIVEtoAoIR0taQdrXYqxLiwdZGyfhsFJWNxlYhMGcLiLE-IH8TA_7kvTQg7pqJtkcfRiLUxmAajlrHNaiCEtPFQ
- 	------------------------------------------------------------------------------------
+eyJhbGciOiJSUzI1NiIsImtpZCI6IkZrTkFjN296TUxsbmFfZmU0MklfLVdUdnRjQXFyMWJ1TzFLbWRDckU1YncifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLXE1Z2Z2Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1MmNiZjU3NS02Y2ExLTQ3YzQtOWQwOS0zYzg1ZTlmMTkxOTEiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZXJuZXRlcy1kYXNoYm9hcmQ6YWRtaW4tdXNlciJ9.hNxqxqeLK1JxOzK4OYPLbv7FlumBkHrwjL6lDUulaMEU1Iwy1Gq9cJvrLj5dh7xec86PasEckTq1BZo63zOvGBrvjVqH4tTecepQLiY-H584V7bcaY2Ps6hr21DVQEcU_mrJ47KlPMxCbXwrARHaaTMQHIgM1MXE4e8Zsk1FBXMZR9YfxRivyBgmc77hJbbs7VExf8v5_QdJPmq-lFA2-whu4jK7kJ_wFq8Xh_aiHegKbkl61FwfgByZarZMT_dHkt4CVx5XbyvEYd_MSJH9qD0CFsXa-TKgP0MJhqJwHbI0FXpW_gG3XiKIbTK0yKrE1eCpGyvyNSnGCxdPbwWbTA
+	------------------------------------------------------------------------------------
 
-13. (Master) Open Kubernetes's forward for operate:
+13. Open Kubernetes's forward for operate:
 	kubectl get pods -n=kubernetes-dashboard
 	kubectl port-forward --address 0.0.0.0 pods/<kubernetes-dashboard-xxx> 8443:8443 -n=kubernetes-dashboard
 	(Ex: kubectl port-forward --address 0.0.0.0 pods/kubernetes-dashboard-7b5bf5d559-stwjc 8443:8443 -n=kubernetes-dashboard)
@@ -220,6 +217,7 @@ watch kubectl get pods --all-namespaces
     kubectl logs kube-proxy-<XXXX> -n kube-system
 
 21 (Worker1) Check IPVS policy by ipvsadm
+    sudo apt-get install -y ipvsadm
 	sudo ipvsadm
 	-------------------------------------------------
 	Example Result:
@@ -246,6 +244,7 @@ UDP  ip-10-96-0-10.ap-southeast-1 rr
 	-------------------------------------------------
 
 22 (Worker2) Check IPVS policy by ipvsadm
+    sudo apt-get install -y ipvsadm
 	sudo ipvsadm
 	-------------------------------------------------
 	Example Result:
