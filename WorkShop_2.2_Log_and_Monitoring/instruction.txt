@@ -55,3 +55,46 @@ Part1: Container Logging:
 12. Cleanup lab by command:
 	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.2_Log_and_Monitoring/databasemodule_deploy.yml
 	kubectl delete -f https://raw.githubusercontent.com/praparn/kubernetes_202303/master/WorkShop_2.2_Log_and_Monitoring/webmodule_deploy.yml
+
+====================================================
+Part2: Ephemeral Logging:
+====================================================
+
+1. Create pods from image without shell by command:
+	kubectl run north-sentinel --image=labdocker/north-sentinel-island:away --restart=Never
+	kubectl get pods
+
+2. Try to exec into pod by command: (expect fail)
+	kubectl exec -it north-sentinel sh
+----------------------------------------
+Example message:
+error: Internal error occurred: error executing command in container: failed to exec in container: failed to start exec "4a5aa956444e01ae4df7f4082234d01e396fdf5bf76d1794ba73fa5e79e4148a": OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown
+----------------------------------------
+
+3. Debug thing happen on pods via alpine linux by command:
+    kubectl debug -it north-sentinel --image=labdocker/alpine:latest --target=north-sentinel
+
+4. Check Ephemeral feature by command:
+	kubectl describe pods north-sentinel
+
+5. CleanUp by command:
+	kubectl delete pods/north-sentinel
+
+====================================================
+Part3: Ephemeral Terminate Application:
+====================================================
+
+1. Create pods from image sample for failing application and check detail by command:
+	kubectl run nginx-bad --image=labdocker/nginx:badversion
+	kubectl get pods
+	kubectl describe pods/nginx-bad
+
+2. Debug by copy all image to inject on epherephemeral by command:
+    kubectl debug nginx-bad -it --copy-to=nginx-debug --container=nginx-bad -- sh
+
+3. Exit from shell and cleanup the debug container by command:
+    kubectl get pods
+	kubectl delete pods/nginx-debug
+
+4. CleanUp by command:
+	kubectl delete pods/nginx-bad
