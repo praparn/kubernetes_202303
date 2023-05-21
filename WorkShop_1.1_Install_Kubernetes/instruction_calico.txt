@@ -50,10 +50,10 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
 
 8. Install calico network component by command:
    8.1 Install operator and CRD by command: 
-     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
+     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/tigera-operator.yaml
 
    8.2 Install calico default setting by command:
-     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
+     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/custom-resources.yaml
 
    8.3 Check status of pods by command:
     watch kubectl get pods --all-namespaces
@@ -90,8 +90,8 @@ libcrc32c              16384  2 nf_conntrack,ip_vs
 
 
 *Remark: In case you need to reinitial all this lab again please kindly following command below (*Warnning: This will reset all lab that you had been operate before)
-    kubectl delete -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
-    kubectl delete -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
+    kubectl delete -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/tigera-operator.yaml
+    kubectl delete -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/custom-resources.yaml
     sudo su -
     kubeadm reset
 	rm -rf /var/lib/etcd
